@@ -1,6 +1,10 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"log"
+
+	"github.com/spf13/viper"
+)
 
 type Config struct {
 	RedisHost     string `mapstructure:"redis_host"`
@@ -29,6 +33,8 @@ func init() {
 	if err := viper.Unmarshal(&cfg); err != nil {
 		panic(err)
 	}
+
+	log.Printf("load config, %v", cfg)
 }
 
 func GetConfig() Config {

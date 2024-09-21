@@ -20,10 +20,10 @@ func NewRateLimiterMiddleware(limiter services.Limiter) *rateLimiterMiddleware {
 func (m *rateLimiterMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Obter a chave para o rate limiting (IP ou token)
-		key := getLimiterKey(r) // Função para extrair a chave do request
+		key, isIp := m.getLimiterKey(r) // Função para extrair a chave do request
 
 		// Verificar se a requisição está dentro do limite
-		if !m.limiter.Allow(key) {
+		if !m.limiter.Allow(key, isIp) {
 			http.Error(w, " you have reached the maximum number of requests or actions allowed within a certain time frame", http.StatusTooManyRequests)
 			return
 		}
@@ -34,11 +34,11 @@ func (m *rateLimiterMiddleware) Middleware(next http.Handler) http.Handler {
 }
 
 // Função auxiliar para obter a chave para o rate limiting
-func getLimiterKey(r *http.Request) string {
+func (m *rateLimiterMiddleware) getLimiterKey(r *http.Request) (string, bool) {
 	// Implemente a lógica para extrair a chave, seja ela o IP ou o token
 	if token := r.Header.Get(HeaderAPIKey); token != "" {
 		// Extrair o token da autorização
-		return token
+		return token, false
 	}
-	return strings.Split(r.RemoteAddr, ":")[0] // Usar o IP como chave
+	return strings.Split(r.RemoteAddr, ":")[0], true // Usar o IP como chave
 }
