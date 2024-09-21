@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"errors"
 	"strconv"
 
 	"github.com/go-redis/redis/v8"
@@ -15,10 +16,12 @@ func NewRedisStorage(client *redis.Client) Storage {
 	return &redisStorage{client: client}
 }
 
+var ErrNotFound = errors.New("not found")
+
 func (s *redisStorage) Get(ctx context.Context, key string) (int, error) {
 	val, err := s.client.Get(ctx, key).Result()
 	if err == redis.Nil {
-		return 0, redis.Nil
+		return 0, ErrNotFound
 	} else if err != nil {
 		return 0, err
 	}

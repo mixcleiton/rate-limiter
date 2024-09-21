@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"log"
@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func main() {
+func Main() {
 
 	cfg := config.GetConfig()
 
@@ -32,7 +32,9 @@ func main() {
 		config.GetConfig().DefaultExpiry,
 		config.GetConfig().DefaultTimeBlocked)
 
+	limiter.ProcessKeysFromFile()
 	middleware := middleware.NewRateLimiterMiddleware(limiter)
+
 	r.Use(middleware.Middleware)
 	r.HandleFunc("/", handler.HandlerHello).Methods("GET")
 
